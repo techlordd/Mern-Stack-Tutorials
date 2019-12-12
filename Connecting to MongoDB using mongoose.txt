@@ -1,0 +1,76 @@
+------------------------------------------
+TOPIC: CONNECTING TO MONGODB WITH MONGOOSE
+------------------------------------------
+
+---------------
+npm install config
+---------------
+
+Introduction
+--------------
+Node-config organizes hierarchical configurations for your app deployments.
+
+It lets you define a set of default parameters, and extend them for different deployment environments (development, qa, staging, production, etc.).
+
+
+Quick Start
+------------
+Install in your app directory, and edit the default config file.
+
+$ npm install config
+$ mkdir config
+$ vi config/default.json
+
+
+--------------
+FOLDER: config/default.json
+-----------------
+
+{
+
+"mongoURI": "mongodb+srv://YOUR MONGOURI HERE"
+
+}
+
+
+-------------------
+FOLDER: config/db.js
+-------------------
+
+const mongoose = require('mongoose');
+const config = require('config');
+const db = config.get('mongoURI');
+
+
+// Declare a variable for the connection
+const connectDB = async () => {
+
+ try {
+  await mongoose.connect(db,  { useNewUrlParser: true });
+
+  console.log('Connected to MongoDB');
+} catch (err) {
+  console.error(err.message);
+  // Exit process with failure
+   process.exit(1);
+}
+
+}
+
+// Export the connection
+module.exports = connectDB;
+
+
+
+
+
+-----------------
+FOLDER: server.js
+------------------
+
+// To call the connection from config/db.js
+
+const connectDB = require('./config/db')
+
+// Connect Database
+connectDB();
