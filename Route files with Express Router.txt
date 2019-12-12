@@ -1,0 +1,71 @@
+-------------------------------
+ROUTE FILES WITH EXPRESS ROUTER
+-------------------------------
+This tutorial will guide you on how to route files with Express Router, and how to link these route files to your server.js.
+
+
+
+------------------------------
+FOLDER: routes/api/myroute.js
+------------------------------
+
+
+const express = require('express');
+const router = express.Router();
+
+
+// @route         GET api/myroute
+// @description   GET route
+// @access        Public
+
+router.get('/', (req, res) => {
+
+res.send('This is a GET Route')
+
+});
+
+
+
+
+--------------------------
+FOLDER: routes/api/auth.js
+--------------------------
+
+const express = require(express);
+const router = express.Router();
+
+
+// @route           GET api/auth
+// @description     GET route
+// @access          Public
+
+router.get('/', (req, res) => {
+
+ res.send('This is a GET route')
+
+});
+
+
+
+
+------------------
+FOLDER: server.js
+------------------
+
+// Call myroute.js
+// When I call /api/myroute,
+// It get its resources from 
+// folder: routes/api/myroutes
+
+
+app.use('/api/myroute', require('./routes/api/myroute'));
+
+
+
+// Call auth.js
+// When I call /api/auth,
+// It get its resources from 
+// folder: routes/api/auth
+
+
+app.use('/api/auth', require('./routes/api/auth'));
