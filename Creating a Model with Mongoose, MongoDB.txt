@@ -1,0 +1,38 @@
+---------------------------------------
+CREATING A MODEL WITH MONGOOSE, MONGODB
+---------------------------------------
+We will create a mongoose User model to connect to our database.
+
+
+--------------------------------
+--------------------------------
+
+const mongoose = require('mongoose');
+
+
+// CREATE SCHEMA
+const UserSchema = new mongoose.Schema({
+
+ name: {
+  type: String,
+  required: true,
+  unique: true
+},
+
+ password: {
+  type: String,
+  required: true
+},
+ 
+ avatar: {
+  type: String
+},
+
+ date: {
+  type: Date,
+  default: Date.now
+}
+});
+
+
+module.exports = User = mongoose.model('user', UserSchema)
