@@ -1,0 +1,58 @@
+----------------------------
+REQUEST AND BODY VALIDATION
+----------------------------
+In this topic we will handle requests and validate our requests using express-validator
+
+
+
+
+-------------
+REQUIREMENTS
+-------------
+npm i express-validator
+npm i body-parser
+
+
+NOTE: call body parser middleware in your server.js using the code below so as to handle requests.
+
+
+------------------
+FOLDER: server.js
+------------------
+
+// Initialize Middleware
+app.use(express.json({ extended: false }));
+
+
+
+-----------------------------
+FOLDER: routes/api/users.js
+-----------------------------
+
+const express = require('express');
+const router = express.Router();
+const { check, validationResult } = require('express-validator/check');
+
+
+router.post('/', [ 
+ 
+check('name', 'Name is required').not().isEmpty(),
+
+ check('email', 'Please include a valid email').isEmail(),
+ 
+check('password', 'Please enter a password with 6 or more characters').isLength({min: 6})], (req, res) => {
+ 
+const errors = validateResult(req);
+ if(!errors.isEmpty()){
+  return res.status(400).json({
+    errors: errors.array() });
+ 
+}
+ res.send('Welcome to User route');
+
+});
+
+
+module.exports = router;
+
+
