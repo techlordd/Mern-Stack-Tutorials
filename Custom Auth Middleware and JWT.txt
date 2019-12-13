@@ -1,0 +1,85 @@
+------------------------------------
+CUSTOM AUTH MIDDLEWARE & JWT VERIFY
+------------------------------------
+In this topic, we will create a custom authentication middleware and verify our jsonwebtoken.
+
+Then we will include the authentication middleware in our routes. Our routes will respond based on the token we have generated.
+
+Cycle: Register user - Get web token back - send user to authenticate
+
+
+------------------------------------------
+NOTE: Create an authentication middleware
+
+---------------------------
+FOLDER: middleware/auth.js
+----------------------------
+
+const jwt = require('jsonwebtoken');
+
+const config = require('config');
+
+module.exports = function(req, res, next) {
+
+ // Get the token from header
+ const token =  req.header('x-auth-token');
+
+ // Check if not token
+ if (!token) {
+   return res.status(401).json({
+    msg: 'No token', authorization denied' 
+});
+
+ // If Token, Verify the token
+ try { 
+   const decoded = jwt.verify(token, config.get('jwtSecret'));
+
+   // Set req.user to any user that 
+   // is in our decoded value from the
+   // token we signed earlier
+   req.user = decoded.user;
+   next();
+} catch (err) { 
+  // Call an unauthorized error
+  res.status(401).json({ msg: 'Token is not valid' });
+}
+};
+
+
+
+
+-----------------------------------------
+NOTE: To include the custom Auth Middleware in our routes
+
+
+-----------------------------
+FOLDER: route/api/auth.js
+-----------------------------
+
+const auth = require('../../middleware/auth');
+const express = require('express');
+const router = express.Router();
+
+// Call our User model
+const User = require('../../models/User');
+
+
+// @route         GET api/auth
+// @description   GET route
+// @access        Public
+
+router.get('/', auth, async (req, res) => {
+
+ try {
+  const user = await User.findById(req.user.id).select('-password');
+  res.json(user);
+} catch(err) {
+   console.error(err.message);
+   res.status(500).send('Server Error');
+}
+});
+
+
+module.exports = router;
+
+
