@@ -1,0 +1,151 @@
+----------------------------------
+IMPLEMENTING JWT [JSON WEB TOKEN]
+----------------------------------
+In this topic, we will discuss how to implement Json Web Token. We will generate a web token for each users on our app.
+
+-jwt.sign(payload, secretOrPrivateKey, [options, callback])
+
+(Asynchronous) If a callback is supplied, the callback is called with the err or the JWT.
+
+
+
+
+-----------------------
+PREREQUISITE
+-------------------
+
+
+
+------------------
+IMPORTANT NOTE
+------------------
+- npm install jsonwebtoken
+
+Include jwtSecret in our FOLDER: config/default.json
+
+
+
+----------------------------
+FOLDER: config/default.json
+-----------------------------
+{
+
+"mongoURI": "mongodb+srv://YOUR MONGOURI HERE",
+"jwtSecret": "mysecrettoken"
+
+}
+
+
+
+
+
+----------------------------
+FOLDER: routes/api/users.js
+----------------------------
+
+const jwt = require('jsonwebtoken');
+
+const config = require('config');
+
+const express = require('express');
+
+const router = express.Router();
+
+const gravatar =  require('gravatar');
+
+const bcrypt = require('bcryptjs');
+
+const { check, validationResult } = 
+require('express-validator/check');
+
+
+// Call your mongoose model e.g We 
+// called User model below
+
+const User = require('../../models/User');
+
+
+router.post('/', [ 
+ 
+check('name', 'Name is required').not().isEmpty(),
+
+ check('email', 'Please include a valid email').isEmail(),
+ 
+check('password', 'Please enter a password with 6 or more characters').isLength({min: 6})], async (req, res) => {
+ 
+
+const errors = validateResult(req);
+ if(!errors.isEmpty()){
+  return res.status(400).json({
+    errors: errors.array() });
+}
+
+// Call your requests
+const { name, email, password } = req.body;
+
+try {
+
+ // Check if user exists
+ let user = await User.findOne({ email });
+ 
+ if (user) {
+  return res.status(400).json({ errors: [{ 
+   msg: 'User already exists' }] });
+}
+
+
+ // Get User Gravatar
+ const avatar = gravatar.url(email, {
+   s: '200',
+   r: 'pg',
+   d: 'mm'      
+});
+
+
+  // Create an Instance of User
+  user = new User({
+   name,
+   email,
+   avatar,
+   password
+});
+
+
+ // Encrpyt the password with bcryptjs
+  const salt = await bcrypt.genSalt(10);
+  
+  user.password = await bcrypt.hash(password, salt);
+ 
+  await user.save();
+
+  
+  //Implementing JSONWEBTOKEN
+  const payload = {
+   user: {
+     id: user.id
+}
+}
+   jwt.sign(
+     payload, 
+     config.get('jwtSecret'),
+     { expiresIn: 3600 },
+     (err, token) => {
+       if (err) throw err;
+       res.json({ token });
+}    
+
+ );
+  
+
+} catch(err) {
+   console.error(err.message);
+   res.status(500).send('Server error');
+}
+
+
+});
+
+
+
+
+
