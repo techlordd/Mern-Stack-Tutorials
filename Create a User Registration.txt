@@ -1,0 +1,120 @@
+-------------------------------------
+CREATE A USER REGISTRATION
+----------------------------------
+In this topic, we will create a user registration for users using the mongoose model we created earlier.
+
+
+----------------
+PREREQUISITE
+----------------
+1. Express-Validator - Request and Body Validation
+2. Creating a Model with Mongoose, MongoDB
+
+
+----------------
+REQUIREMENTS
+----------------
+npm i gravatar
+
+Note: gravatar is a library to generate Gravatar URLs in Node.js Based on gravatar specs
+
+Read more: https://www.npmjs.com/package/gravatar
+
+
+--------------------
+npm i bcryptjs
+
+Note: bcrypt is a library to help you hash passwords
+
+Read more: https://www.npmjs.com/package/bcrypt,
+https://www.npmjs.com/package/bcryptjs
+
+
+
+
+
+---------------------------
+FOLDER: routes/api/users.js
+---------------------------
+
+const express = require('express');
+
+const router = express.Router();
+
+const gravatar =  require('gravatar');
+
+const bcrypt = require('bcryptjs');
+
+const { check, validationResult } = 
+require('express-validator/check');
+
+
+// Call your mongoose model e.g We 
+// called User model below
+
+const User = require('../../models/User');
+
+
+router.post('/', [ 
+ 
+check('name', 'Name is required').not().isEmpty(),
+
+ check('email', 'Please include a valid email').isEmail(),
+ 
+check('password', 'Please enter a password with 6 or more characters').isLength({min: 6})], async (req, res) => {
+ 
+
+const errors = validateResult(req);
+ if(!errors.isEmpty()){
+  return res.status(400).json({
+    errors: errors.array() });
+}
+
+// Call your requests
+const { name, email, password } = req.body;
+
+try {
+
+ // Check if user exists
+ let user = await User.findOne({ email });
+ 
+ if (user) {
+  return res.status(400).json({ errors: [{ 
+   msg: 'User already exists' }] });
+}
+
+
+ // Get User Gravatar
+ const avatar = gravatar.url(email, {
+   s: '200',
+   r: 'pg',
+   d: 'mm'      
+});
+
+
+  // Create an Instance of User
+  user = new User({
+   name,
+   email,
+   avatar,
+   password
+});
+
+
+ // Encrpyt the password with bcryptjs
+  const salt = await bcrypt.genSalt(10);
+  
+  user.password = await bcrypt.hash(password, salt);
+ 
+  await user.save();
+  
+  res.send('User Registered');
+
+
+} catch(err) {
+   console.error(err.message);
+   res.status(500).send('Server error');
+}
+
+
+});
