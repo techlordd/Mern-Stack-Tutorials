@@ -87,6 +87,7 @@ try {
 
   //Implementing JSONWEBTOKEN
   // Declare the payload
+  
   const payload = {
    user: {
      id: user.id
