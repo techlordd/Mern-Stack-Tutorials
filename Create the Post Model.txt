@@ -3,8 +3,6 @@ CREATING THE POST MODEL
 ----------------------------------------
 In this topic, we will update our code to Create the Post Model.
 
-Get a Github username and make a request to our backend
-
 
 
 ---------------
